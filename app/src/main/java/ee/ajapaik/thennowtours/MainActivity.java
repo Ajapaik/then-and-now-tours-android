@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.webkit.GeolocationPermissions;
 import android.webkit.ValueCallback;
@@ -44,8 +45,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // For Android 4.1
-        public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType) {
-            mUploadMessage = uploadMsg;
+        public void openFileChooser(ValueCallback<Uri> uploadFile, String acceptType, String capture) {
+            Log.d("DEBUG", "openFileChooser");
+            mUploadMessage = uploadFile;
             Intent cameraIntent = new Intent("android.media.action.IMAGE_CAPTURE");
             Calendar cal = Calendar.getInstance();
             File photo = new File(Environment.getExternalStorageDirectory(), (cal.getTimeInMillis() + ".jpg"));
@@ -139,21 +141,25 @@ public class MainActivity extends AppCompatActivity {
             mFilePathCallback.onReceiveValue(results);
             mFilePathCallback = null;
         } else {
-            if (requestCode == FILE_CHOOSER_RESULT_CODE) {
-                if (null == this.mUploadMessage) {
-                    return;
-                }
-
-                Uri result;
-                if (resultCode != RESULT_OK) {
-                    result = null;
-                } else {
-                    result = intent == null ? this.mPicUri : intent.getData(); // retrieve from the private variable if the intent is null
-                }
-
-                this.mUploadMessage.onReceiveValue(result);
-                this.mUploadMessage = null;
+            Log.d("DEBUG", "HERE");
+            if (requestCode != FILE_CHOOSER_RESULT_CODE || mFilePathCallback == null) {
+                super.onActivityResult(requestCode, resultCode, intent);
+                return;
             }
+
+            if (null == this.mUploadMessage) {
+                return;
+            }
+
+            Uri result;
+            if (resultCode != Activity.RESULT_OK) {
+                result = null;
+            } else {
+                result = intent == null ? this.mPicUri : intent.getData(); // retrieve from the private variable if the intent is null
+            }
+
+            this.mUploadMessage.onReceiveValue(result);
+            this.mUploadMessage = null;
         }
     }
 
@@ -168,6 +174,9 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setBuiltInZoomControls(true);
         webSettings.setJavaScriptEnabled(true);
         webSettings.setGeolocationEnabled(true);
+        webSettings.setGeolocationDatabasePath(getFilesDir().getPath());
+        webSettings.setDatabaseEnabled(true);
+        webSettings.setDomStorageEnabled(true);
         mWebView.setWebChromeClient(new GeoPhotoWebChromeClient());
         mWebView.setWebViewClient(new MyCustomWebViewClient());
         mWebView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
