@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
         mWebView.setWebChromeClient(new GeoPhotoWebChromeClient());
         mWebView.setWebViewClient(new MyCustomWebViewClient());
         mWebView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-        mWebView.loadUrl("http://staging.ajapaik.ee/then-and-now-tours/");
+        mWebView.loadUrl("http://ajapaik.ee/then-and-now-tours/");
     }
 
     @Override
